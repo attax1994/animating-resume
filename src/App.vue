@@ -14,7 +14,7 @@
     name: 'app',
     components: {
       StyleEditor,
-      ResumeEditor
+      ResumeEditor,
     },
     data() {
       return {
@@ -144,7 +144,7 @@ html{
 
 > 如果你喜欢这个效果，Fork [我的项目](https://github.com/jirengu-inc/animating-resume)，打造你自己的简历！
 
-`
+`,
       }
     },
     created() {
@@ -159,35 +159,67 @@ html{
         await this.showHtml()
         await this.progressivelyShowStyle(2)
       },
+      /**
+       * 将ResumeEditor的呈现形式从markdown源码转为html样式
+       */
       showHtml: function () {
         return new Promise((resolve, reject) => {
           this.enableHtml = true
           resolve()
         })
       },
+      /**
+       * 渐进式加载样式
+       * @param n
+       * @return {Promise<any>}
+       */
       progressivelyShowStyle(n) {
         return new Promise((resolve, reject) => {
+          // 每次间隔40ms
           let interval = this.interval
+
+          // 递归使用，一次写入一个字符
           let showStyle = (async function () {
+            // 加载第n块style，一共3块
             let style = this.fullStyle[n]
-            if (!style) { return }
-            // 计算前 n 个 style 的字符总数
-            let length = this.fullStyle.filter((_, index) => index <= n).map((item) => item.length).reduce((p, c) => p + c, 0)
+            if (!style) {
+              return
+            }
+            // 计算前 n 块 style 的字符总数
+            let length = this.fullStyle
+              // 过滤出前n块style
+              .filter((_, index) => index <= n)
+              // 映射为其长度
+              .map((item) => item.length)
+              // 长度叠加得到总长度
+              .reduce((p, c) => p + c, 0)
+            // 前面几块的总长度
             let prefixLength = length - style.length
+
+            // 如果当前这一块还没有写入完成，递归调用showStyle
             if (this.currentStyle.length < length) {
+              // 调出当前的一个字符
               let l = this.currentStyle.length - prefixLength
               let char = style.substring(l, l + 1) || ' '
+
+              // 将该字符纳入写入的总字符集
               this.currentStyle += char
+
+              // 前一个字符为换行符，需要导向底部
               if (style.substring(l - 1, l) === '\n' && this.$refs.styleEditor) {
                 this.$nextTick(() => {
                   this.$refs.styleEditor.goBottom()
                 })
               }
+
+              // 递归调用，写入下一个字符
               setTimeout(showStyle, interval)
             } else {
               resolve()
             }
           }).bind(this)
+
+          // 开始执行
           showStyle()
         })
       },
@@ -210,8 +242,8 @@ html{
           }
           showResume()
         })
-      }
-    }
+      },
+    },
   }
 
 </script>
@@ -226,7 +258,8 @@ html{
   html {
     min-height: 100vh;
   }
-  *{
+
+  * {
     box-sizing: border-box;
   }
 </style>

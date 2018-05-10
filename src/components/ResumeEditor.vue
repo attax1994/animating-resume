@@ -7,32 +7,34 @@
 
 <script>
   import marked from 'marked'
+
   export default {
     props: ['markdown', 'enableHtml'],
     name: 'ResumeEditor',
     computed: {
       result: function () {
         return this.enableHtml ? marked(this.markdown) : this.markdown
-      }
+      },
     },
     methods: {
       goBottom: function () {
         this.$refs.container.scrollTop = 100000
       },
-      goTop: function(){
+      goTop: function () {
         this.$refs.container.scrollTop = 0
-      }
-    }
+      },
+    },
   }
 
 </script>
 
 <style scoped>
 
-  @media (max-width:500px){
-    .resumeEditor{
+  @media (max-width: 500px) {
+    .resumeEditor {
     }
   }
+
   .htmlMode {
     animation: flip 2s;
   }
